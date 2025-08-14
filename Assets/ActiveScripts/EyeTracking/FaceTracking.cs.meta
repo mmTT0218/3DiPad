@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: 23a1a0ef152164ef28d8efac669b33ec
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - Info: {instanceID: 0}
+  - CT: {instanceID: 0}
+  - CS: {instanceID: 0}
+  - ARCamera: {instanceID: 0}
+  - LCamera: {fileID: 8400000, guid: 26ad466abb1611340af71f6d351ffa0b, type: 2}
+  - RCamera: {fileID: 8400000, guid: 4c5c2c5058323814580b5b26da8da7f3, type: 2}
+  - dst: {fileID: 8400000, guid: 2bca1e38e057ad2488d1880265c40b3a, type: 2}
+  - L: {fileID: 2800000, guid: eb6ff887e56ad5543af44de51b2e85fd, type: 3}
+  - R: {fileID: 2800000, guid: e2f1ff3818e6d1749abaf005352003fb, type: 3}
+  - Red: {fileID: 2800000, guid: 3a5f52bdf52b19641b2c23a24992c811, type: 3}
+  - Blue: {fileID: 2800000, guid: 00145ee980a18de4792fe1956f1fe017, type: 3}
+  - Black: {fileID: 2800000, guid: 0eb716684c4dfb54badcd4d012c1e0bd, type: 3}
+  - White: {fileID: 2800000, guid: a4fb5844666194f4ebccb6664ef39438, type: 3}
+  - sliderDotspace: {instanceID: 0}
+  - sliderImage: {instanceID: 0}
+  - faceManager: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
