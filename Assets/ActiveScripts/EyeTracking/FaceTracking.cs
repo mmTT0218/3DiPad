@@ -8,7 +8,6 @@ public class FaceTracking : MonoBehaviour
     private DisplayConfig display;
     public Information information;
     public Controller origin;
-    public Controller origin_y;
     public Controller parallax;
     public Vector3 leftEye { get; private set; }
     public Vector3 rightEye { get; private set; }
@@ -16,6 +15,12 @@ public class FaceTracking : MonoBehaviour
     public Vector3 rightEyeDisplay { get; private set; }
     private FaceManager faceManager;
     public Controller Lx, Ly, Lz, Rx, Ry, Rz;
+
+    // 2025/08/14 追加
+    public Controller origin_y;
+    public Controller MratioX;
+    public Controller MratioY;
+
     private void Start()
     {
         //faceManager = GameObject.Find("FaceManager").GetComponent<FaceManager>();
@@ -39,9 +44,12 @@ public class FaceTracking : MonoBehaviour
         Shader.SetGlobalVector("_PosR", rightEye);
         Shader.SetGlobalFloat("_Origin", origin.value);
         Shader.SetGlobalFloat("_Parallax", parallax.value);
-        
-        // OriginY
+
+        // 2025/08/14 追加
         Shader.SetGlobalFloat("_OriginY", origin_y.value);
+        // とりあえずScreenOrientaitonは無視
+        Shader.SetGlobalVector("_MRatio", new Vector2(MratioX.value, MratioY.value * (-1)));
+        Shader.SetGlobalFloat("_M", 3.0f * MratioY.value * (-1) / MratioX.value);
     }
     //カメラ座標系をディスプレイ座標に変換（左下原点：単位[px]）
     Vector2 CameraToDisplay(Vector3 cameraPos)

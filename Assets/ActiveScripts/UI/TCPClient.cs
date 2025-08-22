@@ -25,7 +25,9 @@ public class TCPClient : MonoBehaviour
     public Shape targetShape;
     public Texture2D textureBeforeConnect;
     public Texture2D textureAfterConnect;
-    // UIパラメータ
+
+    // --------- UIパラメータ ---------
+    // 両目
     public TMP_InputField Lx;
     public Slider Lx_slider;
     public Toggle Lx_Int;
@@ -44,6 +46,7 @@ public class TCPClient : MonoBehaviour
     public TMP_InputField Rz;
     public Slider Rz_slider;
     public Toggle Rz_Int;
+    // その他
     public TMP_InputField Picture;
     public Slider Pic_slider;
     public Toggle Pic_Int;
@@ -56,6 +59,13 @@ public class TCPClient : MonoBehaviour
     public TMP_InputField OriginY;
     public Slider OriY_slider;
     public Toggle OriY_Int;
+    // 傾き
+    public TMP_InputField MRatioX;
+    public Slider MRatioX_slider;
+    public Toggle MRatioX_Int;
+    public TMP_InputField MRatioY;
+    public Slider MRatioY_slider;
+    public Toggle MRatioY_Int;
     public GameObject UI;
     void Start()
     {
@@ -151,7 +161,9 @@ public class TCPClient : MonoBehaviour
                             safe(Picture.text) + "/" + (Pic_Int.isOn ? "1" : "0") + "/" +
                             safe(Material.text) + "/" + (Mat_Int.isOn ? "1" : "0") + "/" +
                             safe(Origin.text) + "/" + (Ori_Int.isOn ? "1" : "0") + "/" +
-                            safe(OriginY.text) + "/" + (OriY_Int.isOn ? "1" : "0") + "/\n";
+                            safe(OriginY.text) + "/" + (OriY_Int.isOn ? "1" : "0") + "/" +
+                            safe(MRatioX.text) + "/" + (MRatioX_Int.isOn ? "1" : "0") + "/" +
+                            safe(MRatioY.text) + "/" + (OriY_Int.isOn ? "1" : "0") + "/\n";
                         Debug.Log("送信内容: " + message);
                         SendMessageToServer(message);
                     }
@@ -161,6 +173,19 @@ public class TCPClient : MonoBehaviour
                         ProcessIncomingParams(received);
                     }
                     // ------- クロストーク比実験 -------
+                    // * 先に "wb" or "bw" を判断しないといけない
+                    // 白黒
+                    else if (received.StartsWith("wb"))
+                    {
+                        UnityMainThreadDispatcher.Instance().Enqueue(() => { Pic_slider.value = 4; });
+                        SendMessageToServer("OK\n");
+                    }
+                    // 黒白
+                    else if (received.StartsWith("bw"))
+                    {
+                        UnityMainThreadDispatcher.Instance().Enqueue(() => { Pic_slider.value = 5; });
+                        SendMessageToServer("OK\n");
+                    }
                     // 黒
                     else if (received.StartsWith("b"))
                     {
@@ -173,16 +198,14 @@ public class TCPClient : MonoBehaviour
                         UnityMainThreadDispatcher.Instance().Enqueue(() => { Pic_slider.value = 3; });
                         SendMessageToServer("OK\n");
                     }
-                    // 白黒
-                    else if (received.StartsWith("wb"))
+                    // アイトラッキング
+                    else if (received.StartsWith("EyeTracking"))
                     {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() => { Pic_slider.value = 4; });
-                        SendMessageToServer("OK\n");
-                    }
-                    // 黒白
-                    else if (received.StartsWith("bw"))
-                    {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() => { Pic_slider.value = 5; });
+                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                        {
+                            Lx_slider.value += 1;
+                            Rx_slider.value += 1;
+                        });
                         SendMessageToServer("OK\n");
                     }
                     // 他のコマンド
@@ -206,11 +229,11 @@ public class TCPClient : MonoBehaviour
     private void ProcessIncomingParams(string received)
     {
         string[] tokens = received.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-        if (tokens.Length >= 20 && tokens[0] == "current")
+        if (tokens.Length >= 25 && tokens[0] == "current")
         {
             Debug.Log("受信パラメータ数: " + tokens.Length);
             // 受信した値でUIを更新
-            Debug.Log($"UI = {tokens[19]}");
+            Debug.Log($"UI = {tokens[25]}");
             Debug.Log($"Lx = {tokens[1]}, Lx_Int = {tokens[2]}");
             Debug.Log($"Ly = {tokens[3]}, Ly_Int = {tokens[4]}");
             Debug.Log($"Lz = {tokens[5]}, Lz_Int = {tokens[6]}");
@@ -221,6 +244,8 @@ public class TCPClient : MonoBehaviour
             Debug.Log($"Mat = {tokens[15]}, Mat_Int = {tokens[16]}");
             Debug.Log($"Ori = {tokens[17]}, Ori_Int = {tokens[18]}");
             Debug.Log($"OriY = {tokens[19]}, OriY_Int = {tokens[20]}");
+            Debug.Log($"MRatioX = {tokens[21]}, MRatioX_Int = {tokens[22]}");
+            Debug.Log($"MRatioY = {tokens[23]}, MRatioY_Int = {tokens[24]}");
             // UI更新したい場合は Unity のメインスレッドで実行する必要がある
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
@@ -244,7 +269,11 @@ public class TCPClient : MonoBehaviour
                 Ori_Int.isOn = tokens[18] == "1";
                 OriY_slider.value = float.Parse(tokens[19]);
                 OriY_Int.isOn = tokens[20] == "1";
-                UI.SetActive(tokens[21] == "1");
+                MRatioX_slider.value = float.Parse(tokens[21]);
+                MRatioX_Int.isOn = tokens[22] == "1";
+                MRatioY_slider.value = float.Parse(tokens[23]);
+                MRatioY_Int.isOn = tokens[24] == "1";
+                UI.SetActive(tokens[25] == "1");
             });
         }
         else
