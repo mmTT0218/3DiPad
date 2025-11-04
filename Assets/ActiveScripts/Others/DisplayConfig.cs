@@ -29,9 +29,6 @@ public class DisplayConfig : ScriptableObject
     [SerializeField] private float _refractiveIndex;
     [SerializeField] private float _gap;
 
-    // 2025/08/12 追加
-    [SerializeField] private int _patternNum_Ma;
-
     public Vector2 Origin
     {
         get
@@ -99,10 +96,6 @@ public class DisplayConfig : ScriptableObject
     }
     public int PatternNum { get { return _patternNum; } }
 
-    // 2025/08/12 追加
-    public int PatternNum_Ma { get { return _patternNum_Ma; } }
-    // --------------
-
     public float ApertureRatio { get { return _apertureRatio; } }
 
     public int ProximityDot { get { return _proximityDot; } }
@@ -121,11 +114,6 @@ public class DisplayConfig : ScriptableObject
         Shader.SetGlobalFloat("_F", 2 * ExperimentalE / PatternNum);
         Shader.SetGlobalFloat("_E", DesignE);
         Shader.SetGlobalVector("_DisplayResolution", Resolution);
-        // 2025/08/14 追加
-        Shader.SetGlobalInt("_PatternNum_Ma", PatternNum_Ma);                // 増谷式のパターン数
-        Shader.SetGlobalFloat("_Fh", 2 * ExperimentalE / PatternNum_Ma);     // 提案ドットスペース水平幅
-        Shader.SetGlobalFloat("_Fv", 3 * 2 * ExperimentalE / PatternNum_Ma); // 提案ドットスペース垂直幅
-        // ---------------
         Shader.SetGlobalFloat("_M", Slope);
         Shader.SetGlobalVector("_MRatio", AcrossSubpixel);
         Shader.SetGlobalInt("_StartPixel", StartPixel);

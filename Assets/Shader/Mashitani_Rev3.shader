@@ -1,4 +1,4 @@
-Shader "Unlit/Mashitani_Rev2"
+Shader "Unlit/Mashitani_Rev3"
 {
     Properties
     {
@@ -18,7 +18,7 @@ Shader "Unlit/Mashitani_Rev2"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-            #include "include_ma_rev2.cginc"
+            #include "include_ma_rev3.cginc"
 			#include "viewingArea.cginc"
 
             struct appdata

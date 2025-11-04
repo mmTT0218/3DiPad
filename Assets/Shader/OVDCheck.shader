@@ -1,4 +1,4 @@
-Shader "Unlit/Mashitani_Rev2"
+Shader "Unlit/OVDCheck"
 {
     Properties
     {
@@ -18,8 +18,7 @@ Shader "Unlit/Mashitani_Rev2"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-            #include "include_ma_rev2.cginc"
-			#include "viewingArea.cginc"
+            #include "include.cginc"
 
             struct appdata
             {
@@ -46,17 +45,32 @@ Shader "Unlit/Mashitani_Rev2"
                 return o;
             }
 
-            float ma_Draw(subpixel sp, float3 clopeanEye, float leftImage, float rightImage)
+            float4 ParallaxImage(subpixel sp, float2 uv, float leftImage, float rightImage)
             {
-                float3 centerOnOVD = ma_CalcEyePosOnOVD(clopeanEye, sp.pos);
-                float dot = ma_CalcAccurateDot(centerOnOVD);
-                if(dot < (_PatternNum / abs(_MRatio.y) / 2)) return (sp.num <= (dot + _PatternNum / abs(_MRatio.y) / 2) && (sp.num > dot)) ? leftImage : rightImage;	
-                else return (sp.num <= dot  && sp.num > (dot - _PatternNum / abs(_MRatio.y) / 2)) ? rightImage : leftImage;
+                // R : 0 ~ 7
+                if (0 <= sp.num && sp.num >= 7){
+                    return rightImage;
+                }
+                // L : 0 ~ 7
+                else {
+                    return leftImage;
+                }
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return ma_GenerateImage((_PosL + _PosR) / 2.0f, i.uv);
+                // LR 初期化
+                float4 leftImage = tex2D(_LTex, i.uv);
+	            float4 rightImage = tex2D(_RTex, i.uv);
+
+                // rgba 初期化
+                float4 rgba = float4(0, 0, 0, 1);
+
+                pixel p = InitPixel(i.uv * _DisplayResolution);
+                rgba.r = ParallaxImage(p.r, i.uv, leftImage.r, rightImage.r);
+                rgba.g = ParallaxImage(p.g, i.uv, leftImage.g, rightImage.g);
+                rgba.b = ParallaxImage(p.b, i.uv, leftImage.b, rightImage.b);
+                return rgba;
             }
             ENDCG
         }

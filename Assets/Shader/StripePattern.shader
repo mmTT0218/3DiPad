@@ -1,6 +1,6 @@
-Shader "Unlit/Interocular"//アイトラッキング制御前後アリ
+Shader "Unlit/StripePattern"
 {
-	Properties
+    Properties
 	{
 		_MainTex("Texture", 2D) = "white" { }
 	}
@@ -56,11 +56,34 @@ Shader "Unlit/Interocular"//アイトラッキング制御前後アリ
 
 			//main関数のようなもの
 			fixed4 frag(v2f i) : SV_Target
-			{
-				return GenerateImage((_PosL + _PosR) / 2.0f, i.uv);
-			}
+		{
+			// 画素座標（0..width-1）に正規化
+			float2 res = _DisplayResolution;        // float2(width, height) を想定
+			float2 px  = floor(i.uv * res);         // 小数切り下げで画素境界にスナップ
+			px.x = clamp(px.x, 0.0, res.x - 1.0);   // 右端で越境しないように
+
+			int pix = (int)px.x;        // ピクセルX
+			int period = (int)_PatternNum;  // 例: 8（include側で定義済み想定）
+			// サブピクセルX = ピクセルX*3 + 色オフセット(R=0,G=1,B=2)
+			int subR = pix * 3 + 0;
+			int subG = pix * 3 + 1;
+			int subB = pix * 3 + 2;
+
+			// 正の剰余（pix>=0なので通常の % でOK）
+			int phaseR = subR % period;
+			int phaseG = subG % period;
+			int phaseB = subB % period;
+
+			// 0..period/2-1 を黒にする（デューティ50%）
+			float4 rgba = 1.0;
+			rgba.r = (phaseR < period / 2) ? 0.0 : 1.0;
+			rgba.g = (phaseG < period / 2) ? 0.0 : 1.0;
+			rgba.b = (phaseB < period / 2) ? 0.0 : 1.0;
+
+			return rgba;
+		}
+
 			ENDCG
 		}
 	}
 }
-

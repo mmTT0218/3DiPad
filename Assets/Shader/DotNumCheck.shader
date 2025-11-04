@@ -1,4 +1,4 @@
-Shader "Unlit/Mashitani_Rev2"
+Shader "Unlit/DotNumCheck"
 {
     Properties
     {
@@ -18,7 +18,7 @@ Shader "Unlit/Mashitani_Rev2"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-            #include "include_ma_rev2.cginc"
+			#include "include_dot_check.cginc"
 			#include "viewingArea.cginc"
 
             struct appdata
@@ -46,17 +46,9 @@ Shader "Unlit/Mashitani_Rev2"
                 return o;
             }
 
-            float ma_Draw(subpixel sp, float3 clopeanEye, float leftImage, float rightImage)
-            {
-                float3 centerOnOVD = ma_CalcEyePosOnOVD(clopeanEye, sp.pos);
-                float dot = ma_CalcAccurateDot(centerOnOVD);
-                if(dot < (_PatternNum / abs(_MRatio.y) / 2)) return (sp.num <= (dot + _PatternNum / abs(_MRatio.y) / 2) && (sp.num > dot)) ? leftImage : rightImage;	
-                else return (sp.num <= dot  && sp.num > (dot - _PatternNum / abs(_MRatio.y) / 2)) ? rightImage : leftImage;
-            }
-
             fixed4 frag (v2f i) : SV_Target
             {
-                return ma_GenerateImage((_PosL + _PosR) / 2.0f, i.uv);
+                return OnDotNum(i.uv);
             }
             ENDCG
         }

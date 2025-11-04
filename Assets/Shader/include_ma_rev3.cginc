@@ -7,7 +7,7 @@ float _OVD;
 float2 _DisplayResolution;
 //バリア傾斜角[subpx]
 float _M;
-int2 _MRatio;
+float2 _MRatio;
 //ディスプレイの向き
 int _ScreenOrientation;
 //ピクセルピッチ
@@ -62,16 +62,16 @@ float3 ma_PixelNumber(int2 pix)
     if (_ScreenOrientation >= 3)
     {
         pix.x *= 3;
-        p.r = modval(pix.x - (pix.y * (float)_MRatio.x / (float)_MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.g = modval(pix.x + 1.0 - (pix.y * (float)_MRatio.x / (float)_MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.b = modval(pix.x + 2.0 - (pix.y * (float)_MRatio.x / (float)_MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.r = modval(pix.x - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.g = modval(pix.x + 1.0 - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.b = modval(pix.x + 2.0 - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
     }
     else
     {
         pix.y *= 3;
-        p.r = modval(pix.x - (pix.y * (float)_MRatio.x / (float)_MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.g = modval(pix.x - ((pix.y + 1) * (float)_MRatio.x / (float)_MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.b = modval(pix.x - ((pix.y + 2) * (float)_MRatio.x / (float)_MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.r = modval(pix.x - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.g = modval(pix.x - ((pix.y + 1) * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.b = modval(pix.x - ((pix.y + 2) * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
     }
     if (_ScreenOrientation % 2 == 0) Swap(p.r, p.b);
     return p;
@@ -139,31 +139,16 @@ float3 ma_CalcEyePosOnOVD(float3 eyePos, float2 subpixelPos)
 float ma_CalcAccurateDot(float3 eyePos)
 {
     float x = eyePos.x - (eyePos.y / _M) + _Origin;
-	float shift_f = abs(x) / (_F * abs(_MRatio.y));
-	int shift_i = (int)shift_f;
-	float deci = shift_f - shift_i;
-	shift_i %= (_PatternNum / abs(_MRatio.y));
-	if (x >= 0) return (_PatternNum / abs(_MRatio.y) - 1 - shift_i) % (_PatternNum / abs(_MRatio.y)) + 0.99999f - deci;
-	else return shift_i + deci;
+    float shift_f = abs(x) / _F / float(abs(_MRatio.y));        // [0 - 8)の実数倍
+    int shift_i = (int)shift_f;                                 // [0 - 7]の整数倍
+    float deci = shift_f - shift_i;                             // 0 ~ 0.5 の小数部
+    float N = _PatternNum / float(abs(_MRatio.y));              // 正規化区間[0 - 7]
+    shift_i %= int(N);                                          // 0 - 7の整数に正規化
+    if (x >= 0) return (N - (1.0f / float(abs(_MRatio.y))) - shift_i) + 0.49999f - deci;   // 原点x = 0のときは, 7.99999
+    else return shift_i + deci;
 }
-// 描画
-// (-N/2, N/2] に正規化した円周差
-// float normalizeDiff(float d, float N)
-// {
-//     float half = N * 0.5;
-//     float x = fmod(d + half, N);
-//     if (x < 0.0) x += N;   // ここが重要：負のとき補正して [0, N) に
-//     return x - half;
-// }
-// 修正版 
+ 
 float ma_Draw(subpixel sp, float3 clopeanEye, float leftImage, float rightImage);
-// float ma_Draw(subpixel sp, float3 clopeanEye, float leftImage, float rightImage)
-// {
-//     float3 centerOnOVD = ma_CalcEyePosOnOVD(clopeanEye, sp.pos);
-//     float dot = ma_CalcAccurateDot(centerOnOVD);
-//     if(dot < (_PatternNum / abs(_MRatio.y) / 2)) return (sp.num <= (dot + _PatternNum / abs(_MRatio.y) / 2) && (sp.num > dot)) ? leftImage : rightImage;	
-//     else return (sp.num <= dot  && sp.num > (dot - _PatternNum / abs(_MRatio.y) / 2)) ? rightImage : leftImage;
-// }
 
 // 増谷式GenerateImage
 float4 ma_GenerateImage(float3 clopeanEye, float2 uv)

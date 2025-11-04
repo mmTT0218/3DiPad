@@ -36,6 +36,9 @@ float _ProximityDot;
 // Parallax (視差)
 float _Parallax;
 
+// 点灯するドット番号
+int _dotNum;
+
 struct subpixel
 {
 	float2 pos;
@@ -148,13 +151,6 @@ float CalcAccurateDot(float3 eyePos)
 
 float Draw(subpixel sp, float3 clopeanEye, float leftImage, float rightImage);
 float Draw(subpixel sp, float3 leftEye, float3 rightEye, float leftImage, float rightImage);
-// float Draw(subpixel sp, float3 clopeanEye, float leftImage, float rightImage)
-// {
-// 	float3 centerOnOVD = CalcEyePosOnOVD(clopeanEye, sp.pos);
-// 	float dot = CalcAccurateDot(centerOnOVD);
-// 	if(dot < (_PatternNum / 2)) return (sp.num <= (dot + _PatternNum / 2) && (sp.num > dot)) ? leftImage : rightImage;	
-// 	else return (sp.num <= dot  && sp.num > (dot - _PatternNum / 2)) ? rightImage : leftImage;
-// }
 
 float4 GenerateImage(float3 clopeanEye, float2 uv)
 {
@@ -180,4 +176,25 @@ float4 GenerateImage(float3 leftEye, float3 rightEye, float2 uv)
 	rgba.g = Draw(p.g, leftEye, rightEye, leftImage.g, rightImage.g);
 	rgba.b = Draw(p.b, leftEye, rightEye, leftImage.b, rightImage.b);
 	return rgba;
+}
+
+float4 OnDotNum(float2 uv){
+    float4 rgba = float4(0, 0, 0, 1);
+
+    // RGBサブピクセルに番号割り当て
+    pixel p = InitPixel(uv  *_DisplayResolution);
+
+    // Rサブピクセル
+    if (p.r.num == _dotNum){
+        rgba.r = 1;
+    }
+    // Gサブピクセル
+    if (p.g.num == _dotNum){
+        rgba.g = 1;
+    }
+    // Bサブピクセル
+    if (p.b.num == _dotNum){
+        rgba.b = 1;
+    }
+    return rgba;
 }
