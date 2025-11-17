@@ -1,4 +1,4 @@
-Shader "Unlit/OVDCheck"
+Shader "Unlit/Mashitani_NoEyeTracking"
 {
     Properties
     {
@@ -18,7 +18,7 @@ Shader "Unlit/OVDCheck"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-            #include "include.cginc"
+            #include "include_ma_rev3.cginc"
 
             struct appdata
             {
@@ -47,11 +47,11 @@ Shader "Unlit/OVDCheck"
 
             float4 ParallaxImage(subpixel sp, float2 uv, float leftImage, float rightImage)
             {
-                // R : 0 ~ 7
-                if (0 <= sp.num && sp.num <= 7){
+                // R : 0 ~ 4
+                if (0 <= sp.num && sp.num < 4){
                     return rightImage;
                 }
-                // L : 0 ~ 7
+                // L : 4 ~ 8
                 else {
                     return leftImage;
                 }
@@ -66,7 +66,7 @@ Shader "Unlit/OVDCheck"
                 // rgba 初期化
                 float4 rgba = float4(0, 0, 0, 1);
 
-                pixel p = InitPixel(i.uv * _DisplayResolution);
+                pixel p = ma_InitPixel(i.uv * _DisplayResolution);
                 rgba.r = ParallaxImage(p.r, i.uv, leftImage.r, rightImage.r);
                 rgba.g = ParallaxImage(p.g, i.uv, leftImage.g, rightImage.g);
                 rgba.b = ParallaxImage(p.b, i.uv, leftImage.b, rightImage.b);

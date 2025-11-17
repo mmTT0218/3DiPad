@@ -50,9 +50,10 @@ public class FaceTracking : MonoBehaviour
         // 2025/08/30 追加
         Shader.SetGlobalFloat("_dotNum", OnDotNum.value);
         // とりあえずScreenOrientaitonは無視
-        Shader.SetGlobalVector("_MRatio", new Vector2(MratioX.value, MratioY.value * (-1)));
+        Shader.SetGlobalFloat("_MRatio_X", MratioX.value);
         Debug.Log("MratioX: "+  MratioX.value);
         Shader.SetGlobalFloat("_M", 3.0f * MratioY.value * (-1) / MratioX.value);
+        Debug.Log("_M: "+  3.0f * MratioY.value * (-1) / MratioX.value);
     }
     //カメラ座標系をディスプレイ座標に変換（左下原点：単位[px]）
     Vector2 CameraToDisplay(Vector3 cameraPos)

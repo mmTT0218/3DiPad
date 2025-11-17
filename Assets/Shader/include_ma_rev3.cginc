@@ -7,7 +7,8 @@ float _OVD;
 float2 _DisplayResolution;
 //バリア傾斜角[subpx]
 float _M;
-float2 _MRatio;
+int2 _MRatio;
+float _MRatio_X;
 //ディスプレイの向き
 int _ScreenOrientation;
 //ピクセルピッチ
@@ -59,19 +60,21 @@ float modval(float v, float n)
 float3 ma_PixelNumber(int2 pix)
 {
     float3 p;
-    if (_ScreenOrientation >= 3)
+    // 左上端を基準
+    float y_from_top = _DisplayResolution.y - pix.y;
+    if (_ScreenOrientation >= 3) // Landscape モード
     {
         pix.x *= 3;
-        p.r = modval(pix.x - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.g = modval(pix.x + 1.0 - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.b = modval(pix.x + 2.0 - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.r = modval(pix.x - (y_from_top * _MRatio_X / _MRatio.y), _PatternNum / float(abs(_MRatio.y)));
+        p.g = modval(pix.x + 1.0 - (y_from_top * _MRatio_X / _MRatio.y), _PatternNum / float(abs(_MRatio.y)));
+        p.b = modval(pix.x + 2.0 - (y_from_top * _MRatio_X / _MRatio.y), _PatternNum / float(abs(_MRatio.y)));
     }
-    else
+    else   // Portrait モード
     {
         pix.y *= 3;
-        p.r = modval(pix.x - (pix.y * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.g = modval(pix.x - ((pix.y + 1) * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
-        p.b = modval(pix.x - ((pix.y + 2) * _MRatio.x / _MRatio.y), _PatternNum / abs(_MRatio.y));
+        p.r = modval(pix.x - (pix.y * _MRatio_X / _MRatio.y), _PatternNum / float(abs(_MRatio.y)));
+        p.g = modval(pix.x - ((pix.y + 1) * _MRatio_X / _MRatio.y), _PatternNum / float(abs(_MRatio.y)));
+        p.b = modval(pix.x - ((pix.y + 2) * _MRatio_X / _MRatio.y), _PatternNum / float(abs(_MRatio.y)));
     }
     if (_ScreenOrientation % 2 == 0) Swap(p.r, p.b);
     return p;

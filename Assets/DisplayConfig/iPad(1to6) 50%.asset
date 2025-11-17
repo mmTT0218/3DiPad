@@ -16,7 +16,7 @@ MonoBehaviour:
   _ovd: 349.742
   _designE: 63
   _experimentalE: 58
-  _fixedResolution: 0
+  _fixedResolution: 1
   _resolution: {x: 2360, y: 1640}
   _pixelPitch: 0.09597
   _acrossSubpixel: {x: 1, y: -2}
